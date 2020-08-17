@@ -61,9 +61,7 @@ public class CheckSimilarity extends HttpServlet {
 
                                 /////////////////
                                 try {
-                                    System.out.println("aaaaa");
                                     SimilarityResult statusx = sess.checkSimilarity(docid.getDocument(), docid.getPotentialSimilarDocuments(), docid.getPercentage());
-                                    System.out.println("bbbbbb");
                                     if (statusx != null) {
                                         status.setResponseCode("SUCCESS");
                                         status.setResponseDescription("");
@@ -74,8 +72,6 @@ public class CheckSimilarity extends HttpServlet {
                                     }
 
                                 } catch (Exception e) {
-                                    System.out.println("cccccccccccccc");
-                                    e.printStackTrace();
                                     status.setResponseCode("ERROR");
                                     status.setResponseDescription("Unknown Error while Checking for Similarity, kindly resubmit");
 

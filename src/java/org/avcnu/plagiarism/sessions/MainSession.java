@@ -188,9 +188,7 @@ public class MainSession implements MainSessionLocal {
         double max = 0;
         double av = 0;
         double sum = 0;
-        System.out.println("ddddddd ");
         List<SimilarDocuments> list = getSimilarDocumentsBrief(document, potentialSimilarDocuments, percentage);
-System.out.println("eeeeeeeeeeee "+list.size());
         for (SimilarDocuments doc : list) {
             sum += doc.getSimilarityPercentage();
             max = Math.max(max, doc.getSimilarityPercentage());
@@ -207,24 +205,19 @@ System.out.println("eeeeeeeeeeee "+list.size());
     @Override
     public List<SimilarDocuments> getSimilarDocumentsBrief(String document, List<String> potentialdocuments, double percentage) {
         List<SimilarDocuments> documents = new ArrayList();
-        System.out.println("fffffffffff "+potentialdocuments.size());
         try {
             for (String similarDocument : potentialdocuments) {
                 try{
                 Map<String, Integer> documentTokensCount = getTokensCount(document);
-                System.out.println("ggggggggggggg ");
                 double similar = getSimilarity(documentTokensCount, similarDocument);
-                System.out.println("hhhhhhhhhhhh "+similar);
                 if (similar >= percentage) {
                    SimilarDocuments simdoc = new SimilarDocuments(similar, similar, similarDocument, null);
                             documents.add(simdoc);
                 }
                  } catch (Exception j) {
-            j.printStackTrace();
         }
             }
         } catch (Exception j) {
-            j.printStackTrace();
         }
         return documents;
     }
@@ -232,21 +225,16 @@ System.out.println("eeeeeeeeeeee "+list.size());
     @Override
     public List<SimilarDocuments> getSimilarDocuments(String document, List<String> potentialdocuments, double percentage) {
         List<SimilarDocuments> documents = new ArrayList();
-        System.out.println("fffffffffff "+potentialdocuments.size());
         try {
             for (String similarDocument : potentialdocuments) {
                 try{
                 Map<String, Integer> documentTokensCount = getTokensCount(document);
-                System.out.println("ggggggggggggg ");
                 double similar = getSimilarity(documentTokensCount, similarDocument);
-                System.out.println("hhhhhhhhhhhh "+similar);
                 if (similar >= percentage) {
                     StringTokenizer sentences = new StringTokenizer(document, SENTENCE_SEPARATOR);
                     while (sentences.hasMoreElements()) {
                         String sen1 = sentences.nextToken().trim();
-                        System.out.println("iiiiiiiiiiiiiii ");
                         List<SimilarSentences> similarSentences = getSimilarSentences(sen1, similarDocument, percentage);
-                        System.out.println("kkkkkkkkkkk "+similarSentences.size());
                         if (similarSentences.size() > 0) {
                             double per = 0;
                             for (SimilarSentences simsen : similarSentences) {
@@ -258,11 +246,9 @@ System.out.println("eeeeeeeeeeee "+list.size());
                     }
                 }
                  } catch (Exception j) {
-            j.printStackTrace();
         }
             }
         } catch (Exception j) {
-            j.printStackTrace();
         }
         return documents;
     }
