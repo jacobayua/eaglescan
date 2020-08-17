@@ -119,7 +119,7 @@ public class CompareDocuments extends HttpServlet {
                     if (altText2 != null) {
                         doc2 = altText2;
                     } else {
-                        sc.setAttribute("message", fileName2 + " is " + ext2 + "\n but documents must be supported format, please use the following formats: .pdf,.doc, .docx, .xls, .xlsx, .ppt, .pptx");
+                        sc.setAttribute("message", fileName2 + " is " + ext2 + "\n but documents must be in a supported format, please use the following formats: .pdf,.doc, .docx, .xls, .xlsx, .ppt, .pptx");
                     }
                 }
 
