@@ -10,10 +10,18 @@ import java.io.InputStream;
 import java.util.List;
 import javax.ejb.Local;
 import org.apache.tika.exception.TikaException;
+import org.avcnu.plagiarism.entities.Activationcodebatches;
+import org.avcnu.plagiarism.entities.Activationcodes;
+import org.avcnu.plagiarism.entities.Apiauthentication;
+import org.avcnu.plagiarism.entities.Apicalls;
+import org.avcnu.plagiarism.entities.Institutions;
+import org.avcnu.plagiarism.entities.Institutiontype;
+import org.avcnu.plagiarism.entities.Membership;
 import org.avcnu.plagiarism.util.GoogleSearchData;
 import org.avcnu.plagiarism.util.SimilarDocuments;
 import org.avcnu.plagiarism.util.SimilarSentences;
 import org.avcnu.plagiarism.util.SimilarityResult;
+import org.jsoup.nodes.Document;
 import org.languagetool.Language;
 import org.languagetool.rules.RuleMatch;
 import org.xml.sax.SAXException;
@@ -52,5 +60,77 @@ public interface MainSessionLocal {
     public List<RuleMatch> checkGrammer(String document, String omittedwords, String omittedphrases, Language lan);
 
     public List<SimilarDocuments> getSimilarDocumentsBrief(String document, List<String> potentialdocuments, double percentage);
+
+    public boolean authenticateAPICall(String apikey, String ipaddress, String service);
+
+    public List<Institutions> getInstitutionsByType(String type);
+
+    public List<Membership> getMembershipByInstitution(String institutionid, String membershipttatus);
+
+    public List<Institutiontype> getAllInstitutiontypes();
+
+    public List<Activationcodebatches> getActivationcodebatchesByInstitution(String institutionid);
+
+    public List<Activationcodes> getActivationcodesByBatchAndStatus(String batchid, String activationstatus);
+
+    public List<Activationcodes> ActivationcodesByUser(String username, String activationstatus);
+
+    public List<Activationcodebatches> getActivationcodebatchesByDaterange(String datefrom, String dateto);
+
+    public List<Activationcodes> getActivationcodesByDategeneratedrange(String datefrom, String dateto);
+
+    public List<Institutions> getInstitutionsByDateregisteredrange(String datefrom, String dateto);
+
+    public List<Apiauthentication> getApiauthenticationByAllowedIP(String ip);
+
+    public List<Apiauthentication> getApiauthenticationByDateaddedrange(String datefrom, String dateto);
+
+    public List<Apiauthentication> getApiauthenticationByContactemail(String email);
+
+    public List<Apiauthentication> getApiauthenticationByExpiryStatus(String status);
+
+    public List<Apicalls> getApicallsByApikey(String apikey);
+
+    public List<Apicalls> getApicallsByServicecalled(String service);
+
+    public List<Apicalls> getApicallsByIPaddress(String ip);
+
+    public List<Apicalls> getApicallsByDatecalledrange(String datefrom, String dateto);
+
+    public List<Apicalls> getApicallsByApikeyAndDatecalledrange(String apikey, String datefrom, String dateto);
+
+    public List<String> getApicallsAllIpaddresses();
+
+    public List<Membership> getMembershipByInstitutionid(String instid);
+
+    public List<Membership> getMembershipByMembershipright(String right);
+
+    public List<Membership> getMembershipByStatus(String status);
+
+    public List<Membership> getMembershipByStatusAndInstitutionid(String status, String institutionid);
+
+    public List<Membership> getMembershipByRightAndInstitutionid(String right, String institutionid);
+
+    public List<Membership> getMembershipByDateregisteredrange(String datefrom, String dateto);
+
+    public List<Document> getDocumentByUsername(String username);
+
+    public List<Document> getDocumentByPostdaterange(String datefrom, String dateto);
+
+    public List<Document> getDocumentByUsernameAndPostdaterange(String username, String datefrom, String dateto);
+
+    public List<Document> getDocumentByInstitutionid(String instid);
+
+    public List<Document> getDocumentByInstitutionidAndPostdaterange(String institutionid, String datefrom, String dateto);
+
+    public List<Document> getDocumentByTitle(String title);
+
+    public List<Document> getDocumentByAuthor(String author);
+
+    public List<String> getDocumentAllTitles();
+
+    public List<String> getDocumentAllAuthors();
+
+    public List<Document> getDocumentByPublisheddaterange(String yearfrom, String yearto);
     
 }

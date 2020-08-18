@@ -44,16 +44,22 @@ public class CompareDocument extends HttpServlet {
         Gson gson = new Gson();
         CompareDocumentResponse status = new CompareDocumentResponse();
         try {
-            StringBuilder sb = new StringBuilder();
-            String s;
-            while ((s = request.getReader().readLine()) != null) {
-                sb.append(s);
+            String ipAddress = request.getHeader("X-FORWARDED-FOR");
+            if (ipAddress == null) {
+                ipAddress = request.getRemoteAddr();
             }
+            String servicename = request.getRequestURI().substring(request.getRequestURI().lastIndexOf("/") + 1, request.getRequestURI().length());
+            String apikey = request.getHeader("authentication");
 
-            String authentication = request.getHeader("authentication");
-            if (authentication != null) {
-                Map<String, String> map = util.getAuthentications();
-                if (authentication.equals(map.get("CompareDocument"))) {
+            boolean authenticated = sess.authenticateAPICall(apikey, ipAddress, servicename);
+            if (apikey != null) {
+                if (authenticated) {
+
+                    var sb = new StringBuffer();
+                    String s;
+                    while ((s = request.getReader().readLine()) != null) {
+                        sb.append(s);
+                    }
                     if (sb.toString().length() > 0) {
                         CompareDocumentRequest docid = (CompareDocumentRequest) gson.fromJson(sb.toString(), CompareDocumentRequest.class);
                         if (docid != null) {

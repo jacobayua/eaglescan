@@ -10,6 +10,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.solr.client.solrj.SolrClient;
@@ -88,5 +89,51 @@ public class Utilities {
         return TIME;
     }
     
-  
+  public String getPincodes(int size) {
+        String pin;
+        Random ra = new Random();
+        long l1 = ra.nextLong() % 100000000;
+        if (l1 < 0) {
+            l1 = (-1) * l1;
+        }
+        long l2 = ra.nextLong() % 100000000;
+        if (l2 < 0) {
+            l2 = (-1) * l2;
+        }
+        long l3 = ra.nextLong() % 100000000;
+        if (l3 < 0) {
+            l3 = (-1) * l3;
+        }
+        long l4 = ra.nextLong() % 100000000;
+        if (l4 < 0) {
+            l4 = (-1) * l4;
+        }
+
+        String f = Long.toString(l1) + Long.toString(l2) + Long.toString(l3) + Long.toString(l4);
+        String cor = "1234567890987654321123456789";
+        pin = (f + cor).substring(0, size);
+        return pin;
+    }
+
+    public String getTodaysdate() {
+        String month1 = "";
+        String day1 = "";
+        java.util.Calendar cal = new java.util.GregorianCalendar();
+        int year = cal.get(GregorianCalendar.YEAR);
+        int month = (cal.get(GregorianCalendar.MONTH) + 1);
+        int day = cal.get(GregorianCalendar.DATE);
+        if (Integer.toString(month).length() < 2) {
+            month1 = "0" + month;
+        } else {
+            month1 = month + "";
+        }
+        if (Integer.toString(day).length() < 2) {
+            day1 = "0" + day;
+        } else {
+            day1 = day + "";
+        }
+
+        String TODAY = year + "-" + month1 + "-" + day1;
+        return TODAY;
+    }
 }

@@ -16,6 +16,14 @@
         <servlet-name>CompareDocument</servlet-name>
         <servlet-class>org.avcnu.plagiarism.servlets.apis.CompareDocument</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>Usersgeneral</servlet-name>
+        <servlet-class>org.avcnu.plagiarism.servlets.apis.Usersgeneral</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Admingeneral</servlet-name>
+        <servlet-class>org.avcnu.plagiarism.servlets.apis.Admingeneral</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>CompareDocuments</servlet-name>
         <url-pattern>/CompareDocuments</url-pattern>
@@ -31,6 +39,14 @@
     <servlet-mapping>
         <servlet-name>CompareDocument</servlet-name>
         <url-pattern>/CompareDocument</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Usersgeneral</servlet-name>
+        <url-pattern>/Usersgeneral</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Admingeneral</servlet-name>
+        <url-pattern>/Admingeneral</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

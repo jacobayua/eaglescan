@@ -52,43 +52,25 @@ public class IndexDocument extends HttpServlet {
         response.setContentType("application/json");
         Gson gson = new Gson();
         IndexDocumentResponse status = new IndexDocumentResponse();
-///////////////// test
-/**
+
         try {
-            System.out.println("aaaaaa");
 
-            Document ddd = new Document(1l, 1, 1, "Journal",
-                    "Jacob", "Solr Tutorial", "2020/2021", "2020", "DEGREE", "Ayua",
-                    "testing", "Science", "Testing123", "Publish Place", "doc.getVolume()", "doc.getIssueNo()",
-                    "2020", "doc.getPublisher()", "doc.getEdition()", "doc.getIsbn()", "doc.getPages()",
-                    "t4.docx", "doc.getRemark()", 1, "today", "doc.getPostTime()", "doc.getIpAddr()",
-                    "doc.getUserId()");
-
-            //Institutiontype index = new Institutiontype("1", "Nig", "df", 233d, 365, "today", "ayua");
-            System.out.println("bbbbbb");
-            Document dox = (Document) sess.getSingleObject(Document.class, 1l);
-            System.out.println("ccccc " + dox);
-            if (dox == null) {
-                sess.newEntry(ddd);
-                System.out.println("ddddd");
+            String ipAddress = request.getHeader("X-FORWARDED-FOR");
+            if (ipAddress == null) {
+                ipAddress = request.getRemoteAddr();
             }
+            String servicename = request.getRequestURI().substring(request.getRequestURI().lastIndexOf("/") + 1, request.getRequestURI().length());
+            String apikey = request.getHeader("authentication");
 
-        } catch (Exception j) {
-            j.printStackTrace();
-        }
-        * **/
-        ////////////end test
-        try {
-            var sb = new StringBuffer();
-            String s;
-            while ((s = request.getReader().readLine()) != null) {
-                sb.append(s);
-            }
+            boolean authenticated = sess.authenticateAPICall(apikey, ipAddress, servicename);
+            if (apikey != null) {
+                if (authenticated) {
 
-            String authentication = request.getHeader("authentication");
-            if (authentication != null) {
-                Map<String, String> map = util.getAuthentications();
-                if (authentication.equals(map.get("IndexDocument"))) {
+                    var sb = new StringBuffer();
+                    String s;
+                    while ((s = request.getReader().readLine()) != null) {
+                        sb.append(s);
+                    }
                     if (sb.toString().length() > 0) {
                         IndexDocumentRequest docid = (IndexDocumentRequest) gson.fromJson(sb.toString(), IndexDocumentRequest.class);
                         if (docid != null) {

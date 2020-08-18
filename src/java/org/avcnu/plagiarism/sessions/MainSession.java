@@ -30,6 +30,13 @@ import org.apache.tika.language.LanguageIdentifier;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.sax.BodyContentHandler;
+import org.avcnu.plagiarism.entities.Activationcodebatches;
+import org.avcnu.plagiarism.entities.Activationcodes;
+import org.avcnu.plagiarism.entities.Apiauthentication;
+import org.avcnu.plagiarism.entities.Apicalls;
+import org.avcnu.plagiarism.entities.Institutions;
+import org.avcnu.plagiarism.entities.Institutiontype;
+import org.avcnu.plagiarism.entities.Membership;
 import org.avcnu.plagiarism.util.GoogleSearchData;
 import org.avcnu.plagiarism.util.SimilarDocuments;
 import org.avcnu.plagiarism.util.SimilarSentences;
@@ -37,10 +44,8 @@ import org.avcnu.plagiarism.util.SimilarityResult;
 import org.avcnu.plagiarism.util.Utilities;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.languagetool.JLanguageTool;
-import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.spelling.SpellingCheckRule;
 import org.xml.sax.SAXException;
@@ -134,7 +139,7 @@ public class MainSession implements MainSessionLocal {
             String searchURL = GOOGLE_SEARCH_URL + "?q=" + sentence + "&num=" + GOOGLE_SEARCH_DEPT;
             Document doc = Jsoup.connect(searchURL).userAgent("Jsoup client").get();
             Elements results = doc.select("a[href]");
-            for (Element result : results) {
+            results.forEach(result -> {
                 String attr2 = result.attr("class");
                 String url = result.attr("href");
                 if (!attr2.startsWith("_Zkb") && url.startsWith("/url?q=")) {
@@ -142,7 +147,7 @@ public class MainSession implements MainSessionLocal {
                     String title = result.text();
                     response.add(new GoogleSearchData(url, title));
                 }
-            }
+            });
         } catch (IOException js) {
         }
         return response;
@@ -188,9 +193,7 @@ public class MainSession implements MainSessionLocal {
         double max = 0;
         double av = 0;
         double sum = 0;
-        System.out.println("ddddddd ");
         List<SimilarDocuments> list = getSimilarDocumentsBrief(document, potentialSimilarDocuments, percentage);
-System.out.println("eeeeeeeeeeee "+list.size());
         for (SimilarDocuments doc : list) {
             sum += doc.getSimilarityPercentage();
             max = Math.max(max, doc.getSimilarityPercentage());
@@ -207,62 +210,50 @@ System.out.println("eeeeeeeeeeee "+list.size());
     @Override
     public List<SimilarDocuments> getSimilarDocumentsBrief(String document, List<String> potentialdocuments, double percentage) {
         List<SimilarDocuments> documents = new ArrayList();
-        System.out.println("fffffffffff "+potentialdocuments.size());
         try {
-            for (String similarDocument : potentialdocuments) {
-                try{
-                Map<String, Integer> documentTokensCount = getTokensCount(document);
-                System.out.println("ggggggggggggg ");
-                double similar = getSimilarity(documentTokensCount, similarDocument);
-                System.out.println("hhhhhhhhhhhh "+similar);
-                if (similar >= percentage) {
-                   SimilarDocuments simdoc = new SimilarDocuments(similar, similar, similarDocument, null);
-                            documents.add(simdoc);
+            potentialdocuments.forEach(similarDocument -> {
+                try {
+                    Map<String, Integer> documentTokensCount = getTokensCount(document);
+                    double similar = getSimilarity(documentTokensCount, similarDocument);
+                    if (similar >= percentage) {
+                        SimilarDocuments simdoc = new SimilarDocuments(similar, similar, similarDocument, null);
+                        documents.add(simdoc);
+                    }
+                } catch (Exception j) {
                 }
-                 } catch (Exception j) {
-            j.printStackTrace();
-        }
-            }
+            });
         } catch (Exception j) {
-            j.printStackTrace();
         }
         return documents;
     }
-    
+
     @Override
     public List<SimilarDocuments> getSimilarDocuments(String document, List<String> potentialdocuments, double percentage) {
         List<SimilarDocuments> documents = new ArrayList();
-        System.out.println("fffffffffff "+potentialdocuments.size());
         try {
-            for (String similarDocument : potentialdocuments) {
-                try{
-                Map<String, Integer> documentTokensCount = getTokensCount(document);
-                System.out.println("ggggggggggggg ");
-                double similar = getSimilarity(documentTokensCount, similarDocument);
-                System.out.println("hhhhhhhhhhhh "+similar);
-                if (similar >= percentage) {
-                    StringTokenizer sentences = new StringTokenizer(document, SENTENCE_SEPARATOR);
-                    while (sentences.hasMoreElements()) {
-                        String sen1 = sentences.nextToken().trim();
-                        System.out.println("iiiiiiiiiiiiiii ");
-                        List<SimilarSentences> similarSentences = getSimilarSentences(sen1, similarDocument, percentage);
-                        System.out.println("kkkkkkkkkkk "+similarSentences.size());
-                        if (similarSentences.size() > 0) {
-                            double per = 0;
-                            for (SimilarSentences simsen : similarSentences) {
-                                per = Math.max(per, simsen.getSimilarityPercentage());
+            potentialdocuments.forEach(similarDocument -> {
+                try {
+                    Map<String, Integer> documentTokensCount = getTokensCount(document);
+                    double similar = getSimilarity(documentTokensCount, similarDocument);
+                    if (similar >= percentage) {
+                        StringTokenizer sentences = new StringTokenizer(document, SENTENCE_SEPARATOR);
+                        while (sentences.hasMoreElements()) {
+                            String sen1 = sentences.nextToken().trim();
+                            List<SimilarSentences> similarSentences = getSimilarSentences(sen1, similarDocument, percentage);
+                            if (similarSentences.size() > 0) {
+                                double per = 0;
+                                for (SimilarSentences simsen : similarSentences) {
+                                    per = Math.max(per, simsen.getSimilarityPercentage());
+                                }
+                                SimilarDocuments simdoc = new SimilarDocuments(similar, per, similarDocument, similarSentences);
+                                documents.add(simdoc);
                             }
-                            SimilarDocuments simdoc = new SimilarDocuments(similar, per, similarDocument, similarSentences);
-                            documents.add(simdoc);
                         }
                     }
+                } catch (Exception j) {
                 }
-                 } catch (Exception j) {
-            j.printStackTrace();
-        }
-            }
+            });
         } catch (Exception j) {
-            j.printStackTrace();
         }
         return documents;
     }
@@ -357,13 +348,13 @@ System.out.println("eeeeeeeeeeee "+list.size());
     private Map<String, Integer> getTokensCount(String text) {
         Map<String, Integer> tokensCount = new HashMap<>();
         List<String> tokens = tokenizeString(text);
-        for (String token : tokens) {
+        tokens.forEach(token -> {
             if (!tokensCount.containsKey(token)) {
                 tokensCount.put(token, 1);
             } else {
                 tokensCount.put(token, tokensCount.get(token) + 1);
             }
-        }
+        });
         return tokensCount;
     }
 
@@ -389,8 +380,8 @@ System.out.println("eeeeeeeeeeee "+list.size());
 
         return result;
     }
-    
- @Override
+
+    @Override
     public List<RuleMatch> checkGrammer(String document, String omittedwords, String omittedphrases, org.languagetool.Language lan) {
         //words are 'Space delimited'
         //phrases are '::' delimited
@@ -399,27 +390,498 @@ System.out.println("eeeeeeeeeeee "+list.size());
             JLanguageTool langTool = new JLanguageTool(lan);
             if (omittedwords != null) {
                 String[] wordsplit = omittedwords.split(" ");
-                for (Rule rule : langTool.getAllActiveRules()) {
-                    if (rule instanceof SpellingCheckRule) {
-                        List<String> wordsToIgnore = Arrays.asList(wordsplit);
-                        ((SpellingCheckRule) rule).addIgnoreTokens(wordsToIgnore);
-                    }
-                }
+                langTool.getAllActiveRules().stream().filter(rule -> (rule instanceof SpellingCheckRule)).forEachOrdered(rule -> {
+                    List<String> wordsToIgnore = Arrays.asList(wordsplit);
+                    ((SpellingCheckRule) rule).addIgnoreTokens(wordsToIgnore);
+                });
             }
             if (omittedphrases != null) {
                 String[] phrases = omittedphrases.split("::");
-                for (Rule rule : langTool.getAllActiveRules()) {
-                    if (rule instanceof SpellingCheckRule) {
-                        ((SpellingCheckRule) rule).acceptPhrases(Arrays.asList(phrases));
-                    }
-                }
+                langTool.getAllActiveRules().stream().filter(rule -> (rule instanceof SpellingCheckRule)).forEachOrdered(rule -> {
+                    ((SpellingCheckRule) rule).acceptPhrases(Arrays.asList(phrases));
+                });
             }
 
             matches = langTool.check(document);
 
-        } catch (Exception ja) {
+        } catch (IOException ja) {
         }
         return matches;
-    }    
+    }
 
+    @Override
+    public boolean authenticateAPICall(String apikey, String ipaddress, String service) {
+        boolean validate = false;
+        String todaydate = util.getTodaysdate();
+        try {
+            Apiauthentication auth = (Apiauthentication) this.getSingleObject(Apiauthentication.class, apikey);
+            if (auth != null) {
+                if (auth.getAllowedips().contains(ipaddress) && auth.getServices().contains(service) && (auth.getExpirydate().compareTo(todaydate) >= 0 || auth.getExpirydate().equalsIgnoreCase("-1")) && auth.getExpirystatus().equals("ACTIVE") && (auth.getMaxapicalls() >= auth.getNoofapicalls() || auth.getMaxapicalls() == -1)) {
+                    try {
+                        if (auth.getMaxapicalls() != -1) {
+                            auth.setNoofapicalls(auth.getNoofapicalls() + 1);
+                            this.updateRecord(auth);
+                        }
+                    } catch (Exception j) {
+                    }
+                    validate = true;
+                }
+            }
+        } catch (Exception j) {
+        }
+        return validate;
+    }
+
+    @Override
+    public List<Apiauthentication> getApiauthenticationByAllowedIP(String ip) {
+        List<Apiauthentication> list = new ArrayList();
+        ip = "%" + ip + "%";
+        try {
+            list = (List<Apiauthentication>) em.createQuery("SELECT i FROM Apiauthentication i WHERE i.allowedips LIKE :ip ORDER BY i.dateadded ASC")
+                    .setParameter("ip", ip).getResultList();
+
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Apiauthentication> getApiauthenticationByContactemail(String email) {
+        List<Apiauthentication> list = new ArrayList();
+        try {
+            list = (List<Apiauthentication>) em.createQuery("SELECT i FROM Apiauthentication i WHERE i.contactemail = :email ORDER BY i.dateadded ASC")
+                    .setParameter("email", email).getResultList();
+
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Apiauthentication> getApiauthenticationByDateaddedrange(String datefrom, String dateto) {
+        List<Apiauthentication> list = new ArrayList();
+        try {
+            list = (List<Apiauthentication>) em.createQuery("SELECT a FROM Apiauthentication a WHERE a.dateadded >= :datefrom AND a.dateadded <= :dateto ORDER BY a.dateadded DESC")
+                    .setParameter("datefrom", datefrom).setParameter("dateto", dateto).getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Apiauthentication> getApiauthenticationByExpiryStatus(String status) {
+        List<Apiauthentication> list = new ArrayList();
+        try {
+            if (status.equalsIgnoreCase("ALL")) {
+                list = (List<Apiauthentication>) em.createQuery("SELECT i FROM Apiauthentication i ORDER BY i.expirystatus ASC, i.dateadded DESC").getResultList();
+            } else {
+                list = (List<Apiauthentication>) em.createQuery("SELECT i FROM Apiauthentication i WHERE i.expirystatus = :status ORDER BY i.dateadded DESC")
+                        .setParameter("status", status).getResultList();
+            }
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Apicalls> getApicallsByApikey(String apikey) {
+        List<Apicalls> list = new ArrayList();
+        try {
+            list = (List<Apicalls>) em.createQuery("SELECT i FROM Apicalls i WHERE i.apikey = :apikey ORDER BY i.datecalled DESC, i.timecalled DESC")
+                    .setParameter("apikey", apikey).getResultList();
+
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Apicalls> getApicallsByServicecalled(String service) {
+        List<Apicalls> list = new ArrayList();
+        try {
+            list = (List<Apicalls>) em.createQuery("SELECT i FROM Apicalls i WHERE i.servicecalled = :service ORDER BY i.datecalled DESC, i.timecalled DESC")
+                    .setParameter("service", service).getResultList();
+
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Apicalls> getApicallsByIPaddress(String ip) {
+        List<Apicalls> list = new ArrayList();
+        try {
+            list = (List<Apicalls>) em.createQuery("SELECT i FROM Apicalls i WHERE i.ipaddresscall = :ip ORDER BY i.datecalled DESC, i.timecalled DESC")
+                    .setParameter("ip", ip).getResultList();
+
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Apicalls> getApicallsByDatecalledrange(String datefrom, String dateto) {
+        List<Apicalls> list = new ArrayList();
+        try {
+            list = (List<Apicalls>) em.createQuery("SELECT a FROM Apicalls a WHERE a.datecalled >= :datefrom AND a.datecalled <= :dateto ORDER BY a.apikey ASC, a.timecalled DESC")
+                    .setParameter("datefrom", datefrom).setParameter("dateto", dateto).getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Apicalls> getApicallsByApikeyAndDatecalledrange(String apikey, String datefrom, String dateto) {
+        List<Apicalls> list = new ArrayList();
+        try {
+            list = (List<Apicalls>) em.createQuery("SELECT a FROM Apicalls a WHERE a.apikey = :apikey AND a.datecalled >= :datefrom AND a.datecalled <= :dateto ORDER BY a.apikey ASC, a.timecalled DESC")
+                    .setParameter("apikey", apikey).setParameter("datefrom", datefrom).setParameter("dateto", dateto).getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<String> getApicallsAllIpaddresses() {
+        List<String> list = new ArrayList();
+        try {
+            list = (List<String>) em.createQuery("SELECT DISTINCT a.ipaddresscall FROM Apicalls a ORDER BY a.ipaddresscall ASC")
+                    .getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Institutiontype> getAllInstitutiontypes() {
+        List<Institutiontype> list = new ArrayList();
+        try {
+            list = (List<Institutiontype>) em.createQuery("SELECT i FROM Institutiontype i ORDER BY i.typename ASC").getResultList();
+
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Institutions> getInstitutionsByType(String type) {
+        List<Institutions> list = new ArrayList();
+        try {
+            if (type.equalsIgnoreCase("ALL")) {
+                list = (List<Institutions>) em.createQuery("SELECT i FROM Institutions i ORDER BY i.institutionname ASC").getResultList();
+            } else {
+                list = (List<Institutions>) em.createQuery("SELECT i FROM Institutions i WHERE i.institutiontype = :itype ORDER BY i.institutionname ASC")
+                        .setParameter("itype", type).getResultList();
+            }
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Institutions> getInstitutionsByDateregisteredrange(String datefrom, String dateto) {
+        List<Institutions> list = new ArrayList();
+        try {
+            list = (List<Institutions>) em.createQuery("SELECT a FROM Institutions a WHERE a.dateadded >= :datefrom AND a.dateadded <= :dateto ORDER BY a.institutionname ASC")
+                    .setParameter("datefrom", datefrom).setParameter("dateto", dateto).getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Activationcodebatches> getActivationcodebatchesByInstitution(String institutionid) {
+        List<Activationcodebatches> list = new ArrayList();
+        try {
+            if (institutionid.equalsIgnoreCase("ALL")) {
+                list = (List<Activationcodebatches>) em.createQuery("SELECT a FROM Activationcodebatches a ORDER BY a.dategenerated DESC").getResultList();
+            } else {
+                list = (List<Activationcodebatches>) em.createQuery("SELECT a FROM Activationcodebatches a WHERE a.institutionid = :institutionid ORDER BY a.dategenerated DESC")
+                        .setParameter("institutionid", institutionid).getResultList();
+            }
+
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Activationcodebatches> getActivationcodebatchesByDaterange(String datefrom, String dateto) {
+        List<Activationcodebatches> list = new ArrayList();
+        try {
+            list = (List<Activationcodebatches>) em.createQuery("SELECT a FROM Activationcodebatches a WHERE a.dategenerated >= :datefrom AND a.dategenerated <= :dateto ORDER BY a.dategenerated DESC")
+                    .setParameter("datefrom", datefrom).setParameter("dateto", dateto).getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Activationcodes> getActivationcodesByDategeneratedrange(String datefrom, String dateto) {
+        List<Activationcodes> list = new ArrayList();
+        try {
+            list = (List<Activationcodes>) em.createQuery("SELECT a FROM Activationcodes a WHERE a.dategenerated >= :datefrom AND a.dategenerated <= :dateto ORDER BY a.dategenerated DESC")
+                    .setParameter("datefrom", datefrom).setParameter("dateto", dateto).getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Activationcodes> getActivationcodesByBatchAndStatus(String batchid, String activationstatus) {
+        List<Activationcodes> list = new ArrayList();
+        try {
+            if (activationstatus.equalsIgnoreCase("ALL")) {
+                if (batchid.equalsIgnoreCase("ALL")) {
+                    list = (List<Activationcodes>) em.createQuery("SELECT a FROM Activationcodes a ORDER BY a.activationstatus ASC, a.dategenerated DESC").getResultList();
+                } else {
+                    list = (List<Activationcodes>) em.createQuery("SELECT a FROM Activationcodes a WHERE a.batchid = :batchid ORDER BY a.activationstatus ASC, a.dategenerated DESC")
+                            .setParameter("batchid", batchid).getResultList();
+                }
+            } else {
+                if (batchid.equalsIgnoreCase("ALL")) {
+                    list = (List<Activationcodes>) em.createQuery("SELECT a FROM Activationcodes a WHERE a.activationstatus = :activationstatus ORDER BY a.dategenerated DESC")
+                            .setParameter("activationstatus", activationstatus).getResultList();
+                } else {
+                    list = (List<Activationcodes>) em.createQuery("SELECT a FROM Activationcodes a WHERE a.batchid = :batchid AND a.activationstatus = :activationstatus ORDER BY a.dategenerated DESC")
+                            .setParameter("batchid", batchid).setParameter("activationstatus", activationstatus).getResultList();
+                }
+            }
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Activationcodes> ActivationcodesByUser(String username, String activationstatus) {
+        List<Activationcodes> list = new ArrayList();
+        try {
+            if (activationstatus.equalsIgnoreCase("ALL")) {
+                list = (List<Activationcodes>) em.createQuery("SELECT a FROM Activationcodes a WHERE a.username = :username ORDER BY a.activationstatus ASC, a.dategenerated DESC")
+                        .setParameter("username", username).getResultList();
+            } else {
+                list = (List<Activationcodes>) em.createQuery("SELECT a FROM Activationcodes a WHERE a.username = :username AND a.activationstatus = :activationstatus ORDER BY a.activationstatus ASC, a.dategenerated DESC")
+                        .setParameter("activationstatus", activationstatus).setParameter("username", username).getResultList();
+            }
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Membership> getMembershipByInstitution(String institutionid, String membershipttatus) {
+        List<Membership> list = new ArrayList();
+        try {
+            if (institutionid.equalsIgnoreCase("ALL")) {
+                if (membershipttatus.equalsIgnoreCase("ALL")) {
+                    list = (List<Membership>) em.createQuery("SELECT m FROM Membership m ORDER BY m.surname ASC, m.othernames ASC").getResultList();
+                } else {
+                    list = (List<Membership>) em.createQuery("SELECT m FROM Membership m WHERE m.membershipstatus = :status ORDER BY m.surname ASC, m.othernames ASC")
+                            .setParameter("status", membershipttatus).getResultList();
+                }
+            } else {
+                if (membershipttatus.equalsIgnoreCase("ALL")) {
+                    list = (List<Membership>) em.createQuery("SELECT m FROM Membership m WHERE m.institutionid = :institutionid ORDER BY m.surname ASC, m.othernames ASC")
+                            .setParameter("institutionid", institutionid).getResultList();
+                } else {
+                    list = (List<Membership>) em.createQuery("SELECT m FROM Membership m WHERE m.institutionid = :institutionid AND m.membershipstatus = :status ORDER BY m.surname ASC, m.othernames ASC")
+                            .setParameter("status", membershipttatus).setParameter("institutionid", institutionid).getResultList();
+                }
+
+            }
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Membership> getMembershipByInstitutionid(String instid) {
+        List<Membership> list = new ArrayList();
+        try {
+            if (instid.equalsIgnoreCase("ALL")) {
+                list = (List<Membership>) em.createQuery("SELECT i FROM Membership i ORDER BY i.institutionid ASC, i.surname ASC, i.othernames ASC").getResultList();
+            } else {
+                list = (List<Membership>) em.createQuery("SELECT i FROM Membership i WHERE i.institutionid = :instid ORDER BY i.surname ASC, i.othernames ASC")
+                        .setParameter("instid", instid).getResultList();
+            }
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Membership> getMembershipByMembershipright(String right) {
+        right = "%" + right + "%";
+        List<Membership> list = new ArrayList();
+        try {
+            list = (List<Membership>) em.createQuery("SELECT i FROM Membership i WHERE i.memershiprights LIKE :right ORDER BY i.surname ASC, i.othernames ASC")
+                    .setParameter("right", right).getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Membership> getMembershipByStatus(String status) {
+        List<Membership> list = new ArrayList();
+        try {
+            if (status.equalsIgnoreCase("ALL")) {
+                list = (List<Membership>) em.createQuery("SELECT i FROM Membership i ORDER BY i.institutionid ASC, i.surname ASC, i.othernames ASC").getResultList();
+            } else {
+                list = (List<Membership>) em.createQuery("SELECT i FROM Membership i WHERE i.membershipstatus = :status ORDER BY i.institutionid ASC, i.surname ASC, i.othernames ASC")
+                        .setParameter("status", status).getResultList();
+            }
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Membership> getMembershipByStatusAndInstitutionid(String status, String institutionid) {
+        List<Membership> list = new ArrayList();
+        try {
+            list = (List<Membership>) em.createQuery("SELECT i FROM Membership i WHERE i.membershipstatus = :status AND i.institutionid = :institutionid ORDER BY i.surname ASC, i.othernames ASC")
+                    .setParameter("status", status).setParameter("institutionid", institutionid).getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Membership> getMembershipByRightAndInstitutionid(String right, String institutionid) {
+        right = "%" + right + "%";
+        List<Membership> list = new ArrayList();
+        try {
+            list = (List<Membership>) em.createQuery("SELECT i FROM Membership i WHERE i.memershiprights LIKE :right AND i.institutionid = :institutionid ORDER BY i.surname ASC, i.othernames ASC")
+                    .setParameter("right", right).setParameter("institutionid", institutionid).getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Membership> getMembershipByDateregisteredrange(String datefrom, String dateto) {
+        List<Membership> list = new ArrayList();
+        try {
+            list = (List<Membership>) em.createQuery("SELECT a FROM Membership a WHERE a.dateregistered >= :datefrom AND a.dateregistered <= :dateto ORDER BY a.institutionid ASC, a.dateregistered DESC")
+                    .setParameter("datefrom", datefrom).setParameter("dateto", dateto).getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Document> getDocumentByUsername(String username) {
+        List<Document> list = new ArrayList();
+        try {
+            if (username.equalsIgnoreCase("ALL")) {
+                list = (List<Document>) em.createQuery("SELECT d FROM Document d ORDER BY d.title ASC, d.publishedYear DESC").getResultList();
+            } else {
+                list = (List<Document>) em.createQuery("SELECT d FROM Document d WHERE d.userId = :username ORDER BY d.title ASC, d.publishedYear DESC")
+                        .setParameter("username", username).getResultList();
+            }
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Document> getDocumentByPostdaterange(String datefrom, String dateto) {
+        List<Document> list = new ArrayList();
+        try {
+            list = (List<Document>) em.createQuery("SELECT d FROM Document d WHERE d.postDate >= :datefrom AND d.postDate <= :dateto ORDER BY d.title ASC, d.publishedYear DESC")
+                    .setParameter("datefrom", datefrom).setParameter("dateto", dateto).getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Document> getDocumentByUsernameAndPostdaterange(String username, String datefrom, String dateto) {
+        List<Document> list = new ArrayList();
+        try {
+            list = (List<Document>) em.createQuery("SELECT d FROM Document d WHERE d.userId = :username AND d.postDate >= :datefrom AND d.postDate <= :dateto ORDER BY d.title ASC, d.publishedYear DESC")
+                    .setParameter("username", username).setParameter("datefrom", datefrom).setParameter("dateto", dateto).getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Document> getDocumentByInstitutionid(String instid) {
+        List<Document> list = new ArrayList();
+        try {
+            list = (List<Document>) em.createQuery("SELECT d FROM Document d WHERE d.instId = :instid ORDER BY d.title ASC, d.publishedYear DESC")
+                    .setParameter("instid", instid).getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Document> getDocumentByInstitutionidAndPostdaterange(String institutionid, String datefrom, String dateto) {
+        List<Document> list = new ArrayList();
+        try {
+            list = (List<Document>) em.createQuery("SELECT d FROM Document d WHERE d.instId = :institutionid AND d.postDate >= :datefrom AND d.postDate <= :dateto ORDER BY d.title ASC, d.publishedYear DESC")
+                    .setParameter("institutionid", institutionid).setParameter("datefrom", datefrom).setParameter("dateto", dateto).getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Document> getDocumentByTitle(String title) {
+        List<Document> list = new ArrayList();
+        try {
+            list = (List<Document>) em.createQuery("SELECT d FROM Document d WHERE d.title = :title ORDER BY d.publishedYear DESC")
+                    .setParameter("title", title).getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Document> getDocumentByAuthor(String author) {
+        author = "%" + author + "%";
+        List<Document> list = new ArrayList();
+        try {
+            list = (List<Document>) em.createQuery("SELECT d FROM Document d WHERE d.author LIKE :author ORDER BY d.title ASC, d.publishedYear DESC")
+                    .setParameter("author", author).getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<String> getDocumentAllTitles() {
+        List<String> list = new ArrayList();
+        try {
+            list = (List<String>) em.createQuery("SELECT DISTINCT d.title FROM Document d ORDER BY d.title ASC")
+                    .getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<String> getDocumentAllAuthors() {
+        List<String> list = new ArrayList();
+        try {
+            list = (List<String>) em.createQuery("SELECT DISTINCT d.author FROM Document d ORDER BY d.author ASC")
+                    .getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
+
+    @Override
+    public List<Document> getDocumentByPublisheddaterange(String yearfrom, String yearto) {
+        List<Document> list = new ArrayList();
+        try {
+            list = (List<Document>) em.createQuery("SELECT d FROM Document d WHERE d.publishedYear >= :datefrom AND d.publishedYear <= :dateto ORDER BY d.publishedYear DESC, d.title ASC")
+                    .setParameter("datefrom", yearfrom).setParameter("dateto", yearto).getResultList();
+        } catch (Exception j) {
+        }
+        return list;
+    }
 }
