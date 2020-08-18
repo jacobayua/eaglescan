@@ -22,7 +22,7 @@ import org.avcnu.plagiarism.util.Utilities;
  *
  * @author eaglescan
  */
-public class CheckSimilarity extends HttpServlet {
+public class Admingeneral extends HttpServlet {
 
     @EJB
     private MainSessionLocal sess;

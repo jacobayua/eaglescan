@@ -29,7 +29,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Apicalls.findByApicallid", query = "SELECT a FROM Apicalls a WHERE a.apicallid = :apicallid"),
     @NamedQuery(name = "Apicalls.findByApikey", query = "SELECT a FROM Apicalls a WHERE a.apikey = :apikey"),
     @NamedQuery(name = "Apicalls.findByServicecalled", query = "SELECT a FROM Apicalls a WHERE a.servicecalled = :servicecalled"),
-    @NamedQuery(name = "Apicalls.findByDatatimecall", query = "SELECT a FROM Apicalls a WHERE a.datatimecall = :datatimecall")})
+    @NamedQuery(name = "Apicalls.findByDatecalled", query = "SELECT a FROM Apicalls a WHERE a.datecalled = :datecalled"),
+    @NamedQuery(name = "Apicalls.findByIpaddresscall", query = "SELECT a FROM Apicalls a WHERE a.ipaddresscall = :ipaddresscall")})
 public class Apicalls implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -46,14 +47,22 @@ public class Apicalls implements Serializable {
     @Column(name = "servicecalled")
     private String servicecalled;
     @Size(max = 45)
-    @Column(name = "datatimecall")
-    private String datatimecall;
+    @Column(name = "datecalled")
+    private String datecalled;
+    @Size(max = 45)
+    @Column(name = "timecalled")
+    private String timecalled;
+    @Size(max = 45)
+    @Column(name = "ipaddresscall")
+    private String ipaddresscall;
 
-    public Apicalls(String apicallid, String apikey, String servicecalled, String datatimecall) {
+    public Apicalls(String apicallid, String apikey, String servicecalled, String datecalled, String timecalled, String ipaddresscall) {
         this.apicallid = apicallid;
         this.apikey = apikey;
         this.servicecalled = servicecalled;
-        this.datatimecall = datatimecall;
+        this.datecalled = datecalled;
+        this.timecalled=timecalled;
+        this.ipaddresscall = ipaddresscall;
     }
 
     public Apicalls() {
@@ -87,12 +96,20 @@ public class Apicalls implements Serializable {
         this.servicecalled = servicecalled;
     }
 
-    public String getDatatimecall() {
-        return datatimecall;
+    public String getDatecalled() {
+        return datecalled;
     }
 
-    public void setDatatimecall(String datatimecall) {
-        this.datatimecall = datatimecall;
+    public void setDatecalled(String datecalled) {
+        this.datecalled = datecalled;
+    }
+
+    public String getIpaddresscall() {
+        return ipaddresscall;
+    }
+
+    public void setIpaddresscall(String ipaddresscall) {
+        this.ipaddresscall = ipaddresscall;
     }
 
     @Override
@@ -118,6 +135,20 @@ public class Apicalls implements Serializable {
     @Override
     public String toString() {
         return "org.avcnu.plagiarism.entities.Apicalls[ apicallid=" + apicallid + " ]";
+    }
+
+    /**
+     * @return the timecalled
+     */
+    public String getTimecalled() {
+        return timecalled;
+    }
+
+    /**
+     * @param timecalled the timecalled to set
+     */
+    public void setTimecalled(String timecalled) {
+        this.timecalled = timecalled;
     }
     
 }

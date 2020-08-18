@@ -68,8 +68,11 @@ public class Membership implements Serializable {
     @Size(max = 45)
     @Column(name = "membershipstatus")
     private String membershipstatus;
+    @Size(max = 45)
+    @Column(name = "dateregistered")
+    private String dateregistered;
 
-    public Membership(String membershipid, String surname, String othernames, String institutionid, String contactaddress, String phoneno, String memershiprights, String password, String membershipstatus) {
+    public Membership(String membershipid, String surname, String othernames, String institutionid, String contactaddress, String phoneno, String memershiprights, String password, String membershipstatus, String dateregistered) {
         this.membershipid = membershipid;
         this.surname = surname;
         this.othernames = othernames;
@@ -79,6 +82,7 @@ public class Membership implements Serializable {
         this.memershiprights = memershiprights;
         this.password = password;
         this.membershipstatus = membershipstatus;
+        this.dateregistered = dateregistered;
     }
 
     public Membership() {
@@ -183,6 +187,20 @@ public class Membership implements Serializable {
     @Override
     public String toString() {
         return "org.avcnu.plagiarism.entities.Membership[ membershipid=" + membershipid + " ]";
+    }
+
+    /**
+     * @return the dateregistered
+     */
+    public String getDateregistered() {
+        return dateregistered;
+    }
+
+    /**
+     * @param dateregistered the dateregistered to set
+     */
+    public void setDateregistered(String dateregistered) {
+        this.dateregistered = dateregistered;
     }
     
 }

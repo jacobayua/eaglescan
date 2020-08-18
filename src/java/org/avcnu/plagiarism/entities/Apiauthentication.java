@@ -32,7 +32,12 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Apiauthentication.findByAddedby", query = "SELECT a FROM Apiauthentication a WHERE a.addedby = :addedby"),
     @NamedQuery(name = "Apiauthentication.findByOrganizationname", query = "SELECT a FROM Apiauthentication a WHERE a.organizationname = :organizationname"),
     @NamedQuery(name = "Apiauthentication.findByContactemail", query = "SELECT a FROM Apiauthentication a WHERE a.contactemail = :contactemail"),
-    @NamedQuery(name = "Apiauthentication.findByContactno", query = "SELECT a FROM Apiauthentication a WHERE a.contactno = :contactno")})
+    @NamedQuery(name = "Apiauthentication.findByContactno", query = "SELECT a FROM Apiauthentication a WHERE a.contactno = :contactno"),
+    @NamedQuery(name = "Apiauthentication.findByServices", query = "SELECT a FROM Apiauthentication a WHERE a.services = :services"),
+    @NamedQuery(name = "Apiauthentication.findByExpirydate", query = "SELECT a FROM Apiauthentication a WHERE a.expirydate = :expirydate"),
+    @NamedQuery(name = "Apiauthentication.findByExpirystatus", query = "SELECT a FROM Apiauthentication a WHERE a.expirystatus = :expirystatus"),
+    @NamedQuery(name = "Apiauthentication.findByMaxapicalls", query = "SELECT a FROM Apiauthentication a WHERE a.maxapicalls = :maxapicalls"),
+    @NamedQuery(name = "Apiauthentication.findByNoofapicalls", query = "SELECT a FROM Apiauthentication a WHERE a.noofapicalls = :noofapicalls")})
 public class Apiauthentication implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -60,8 +65,21 @@ public class Apiauthentication implements Serializable {
     @Size(max = 100)
     @Column(name = "contactno")
     private String contactno;
+    @Size(max = 200)
+    @Column(name = "services")
+    private String services;
+    @Size(max = 45)
+    @Column(name = "expirydate")
+    private String expirydate;
+    @Size(max = 45)
+    @Column(name = "expirystatus")
+    private String expirystatus;
+    @Column(name = "maxapicalls")
+    private Long maxapicalls;
+    @Column(name = "noofapicalls")
+    private Long noofapicalls;
 
-    public Apiauthentication(String apikey, String allowedips, String dateadded, String addedby, String organizationname, String contactemail, String contactno) {
+    public Apiauthentication(String apikey, String allowedips, String dateadded, String addedby, String organizationname, String contactemail, String contactno, String services, String expirydate, String expirystatus, Long maxapicalls, Long noofapicalls) {
         this.apikey = apikey;
         this.allowedips = allowedips;
         this.dateadded = dateadded;
@@ -69,6 +87,11 @@ public class Apiauthentication implements Serializable {
         this.organizationname = organizationname;
         this.contactemail = contactemail;
         this.contactno = contactno;
+        this.services = services;
+        this.expirydate = expirydate;
+        this.expirystatus = expirystatus;
+        this.maxapicalls = maxapicalls;
+        this.noofapicalls = noofapicalls;
     }
 
     public Apiauthentication() {
@@ -132,6 +155,46 @@ public class Apiauthentication implements Serializable {
 
     public void setContactno(String contactno) {
         this.contactno = contactno;
+    }
+
+    public String getServices() {
+        return services;
+    }
+
+    public void setServices(String services) {
+        this.services = services;
+    }
+
+    public String getExpirydate() {
+        return expirydate;
+    }
+
+    public void setExpirydate(String expirydate) {
+        this.expirydate = expirydate;
+    }
+
+    public String getExpirystatus() {
+        return expirystatus;
+    }
+
+    public void setExpirystatus(String expirystatus) {
+        this.expirystatus = expirystatus;
+    }
+
+    public Long getMaxapicalls() {
+        return maxapicalls;
+    }
+
+    public void setMaxapicalls(Long maxapicalls) {
+        this.maxapicalls = maxapicalls;
+    }
+
+    public Long getNoofapicalls() {
+        return noofapicalls;
+    }
+
+    public void setNoofapicalls(Long noofapicalls) {
+        this.noofapicalls = noofapicalls;
     }
 
     @Override
