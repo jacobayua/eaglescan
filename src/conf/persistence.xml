@@ -4,6 +4,11 @@
     <jta-data-source>java:jboss/datasources/MariadbDS</jta-data-source>
     <class>org.avcnu.plagiarism.entities.Apicalls</class>
     <class>org.avcnu.plagiarism.entities.Apiauthentication</class>
+    <class>org.avcnu.plagiarism.entities.Paymentreference</class>
+    <class>org.avcnu.plagiarism.entities.Paymenttrash</class>
+    <class>org.avcnu.plagiarism.entities.Payments</class>
+    <class>org.avcnu.plagiarism.entities.Webpayattempts</class>
+    <class>org.avcnu.plagiarism.entities.Paymentnotification</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties/>
   </persistence-unit>

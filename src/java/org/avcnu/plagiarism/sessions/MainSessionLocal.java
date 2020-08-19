@@ -17,11 +17,12 @@ import org.avcnu.plagiarism.entities.Apicalls;
 import org.avcnu.plagiarism.entities.Institutions;
 import org.avcnu.plagiarism.entities.Institutiontype;
 import org.avcnu.plagiarism.entities.Membership;
+import org.avcnu.plagiarism.entities.Paymentreference;
 import org.avcnu.plagiarism.util.GoogleSearchData;
 import org.avcnu.plagiarism.util.SimilarDocuments;
 import org.avcnu.plagiarism.util.SimilarSentences;
 import org.avcnu.plagiarism.util.SimilarityResult;
-import org.jsoup.nodes.Document;
+import org.avcnu.plagiarism.entities.Document;
 import org.languagetool.Language;
 import org.languagetool.rules.RuleMatch;
 import org.xml.sax.SAXException;
@@ -73,7 +74,7 @@ public interface MainSessionLocal {
 
     public List<Activationcodes> getActivationcodesByBatchAndStatus(String batchid, String activationstatus);
 
-    public List<Activationcodes> ActivationcodesByUser(String username, String activationstatus);
+    public List<Activationcodes> getActivationcodesByUser(String username, String activationstatus);
 
     public List<Activationcodebatches> getActivationcodebatchesByDaterange(String datefrom, String dateto);
 
@@ -132,5 +133,11 @@ public interface MainSessionLocal {
     public List<String> getDocumentAllAuthors();
 
     public List<Document> getDocumentByPublisheddaterange(String yearfrom, String yearto);
+
+    public Paymentreference generatePaymentReference(String activationcode);
+
+    public Activationcodes generateActivationCode(String batchcode, String userid);
+
+    public boolean assignUserToActivationCode(String userid, String activationcode);
     
 }

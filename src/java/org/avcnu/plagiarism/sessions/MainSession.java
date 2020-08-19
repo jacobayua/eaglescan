@@ -34,16 +34,17 @@ import org.avcnu.plagiarism.entities.Activationcodebatches;
 import org.avcnu.plagiarism.entities.Activationcodes;
 import org.avcnu.plagiarism.entities.Apiauthentication;
 import org.avcnu.plagiarism.entities.Apicalls;
+import org.avcnu.plagiarism.entities.Document;
 import org.avcnu.plagiarism.entities.Institutions;
 import org.avcnu.plagiarism.entities.Institutiontype;
 import org.avcnu.plagiarism.entities.Membership;
+import org.avcnu.plagiarism.entities.Paymentreference;
 import org.avcnu.plagiarism.util.GoogleSearchData;
 import org.avcnu.plagiarism.util.SimilarDocuments;
 import org.avcnu.plagiarism.util.SimilarSentences;
 import org.avcnu.plagiarism.util.SimilarityResult;
 import org.avcnu.plagiarism.util.Utilities;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.languagetool.JLanguageTool;
 import org.languagetool.rules.RuleMatch;
@@ -56,12 +57,12 @@ import org.xml.sax.SAXException;
  */
 @Stateless
 public class MainSession implements MainSessionLocal {
-
+    
     Utilities util = new Utilities();
-
+    
     @PersistenceContext(unitName = "EagleScanPU")
     private EntityManager em;
-
+    
     private final int SIMILARITY_DEFAULT_PERCENTAGE = 25;
     private final int GOOGLE_SEARCH_DEPT = 1;
     private final String SENTENCE_SEPARATOR = "(?<=[.!?])\\s*";
@@ -78,7 +79,7 @@ public class MainSession implements MainSessionLocal {
     public void persist(Object object) {
         em.persist(object);
     }
-
+    
     public void remove(Object object) {
         try {
             em.remove(em.contains(object) ? object : em.merge(object));
@@ -87,7 +88,7 @@ public class MainSession implements MainSessionLocal {
         } finally {
         }
     }
-
+    
     public void merge(Object object) {
         try {
             em.merge(object);
@@ -96,7 +97,7 @@ public class MainSession implements MainSessionLocal {
         } finally {
         }
     }
-
+    
     @Override
     public void newEntry(Object obj) {
         try {
@@ -104,7 +105,7 @@ public class MainSession implements MainSessionLocal {
         } catch (Exception j) {
         }
     }
-
+    
     @Override
     public void deleteObject(Object obj) {
         try {
@@ -112,7 +113,7 @@ public class MainSession implements MainSessionLocal {
         } catch (Exception j) {
         }
     }
-
+    
     @Override
     public void updateRecord(Object obj) {
         try {
@@ -120,7 +121,7 @@ public class MainSession implements MainSessionLocal {
         } catch (Exception ja) {
         }
     }
-
+    
     @Override
     public Object getSingleObject(Class<?> ent, Object pk) {
         Object obj = null;
@@ -137,7 +138,7 @@ public class MainSession implements MainSessionLocal {
         List<GoogleSearchData> response = new ArrayList();
         try {
             String searchURL = GOOGLE_SEARCH_URL + "?q=" + sentence + "&num=" + GOOGLE_SEARCH_DEPT;
-            Document doc = Jsoup.connect(searchURL).userAgent("Jsoup client").get();
+            org.jsoup.nodes.Document doc = Jsoup.connect(searchURL).userAgent("Jsoup client").get();
             Elements results = doc.select("a[href]");
             results.forEach(result -> {
                 String attr2 = result.attr("class");
@@ -152,7 +153,7 @@ public class MainSession implements MainSessionLocal {
         }
         return response;
     }
-
+    
     @Override
     public String extractText(InputStream stream) throws IOException, SAXException, TikaException {
         AutoDetectParser parser = new AutoDetectParser();
@@ -180,13 +181,13 @@ public class MainSession implements MainSessionLocal {
         }
         return text;
     }
-
+    
     @Override
     public String identifyLanguage(String text) {
         LanguageIdentifier identifier = new LanguageIdentifier(text);
         return identifier.getLanguage();
     }
-
+    
     @Override
     public SimilarityResult checkSimilarity(String document, List<String> potentialSimilarDocuments, double percentage) {
         SimilarityResult result;
@@ -198,7 +199,7 @@ public class MainSession implements MainSessionLocal {
             sum += doc.getSimilarityPercentage();
             max = Math.max(max, doc.getSimilarityPercentage());
         }
-
+        
         try {
             av = sum / list.size();
         } catch (Exception j) {
@@ -206,7 +207,7 @@ public class MainSession implements MainSessionLocal {
         result = new SimilarityResult(av, max, list);
         return result;
     }
-
+    
     @Override
     public List<SimilarDocuments> getSimilarDocumentsBrief(String document, List<String> potentialdocuments, double percentage) {
         List<SimilarDocuments> documents = new ArrayList();
@@ -226,7 +227,7 @@ public class MainSession implements MainSessionLocal {
         }
         return documents;
     }
-
+    
     @Override
     public List<SimilarDocuments> getSimilarDocuments(String document, List<String> potentialdocuments, double percentage) {
         List<SimilarDocuments> documents = new ArrayList();
@@ -257,7 +258,7 @@ public class MainSession implements MainSessionLocal {
         }
         return documents;
     }
-
+    
     @Override
     public List<SimilarSentences> getSimilarSentences(String sentence, String document, double percentage) {
         List<SimilarSentences> sentences = new ArrayList();
@@ -276,7 +277,7 @@ public class MainSession implements MainSessionLocal {
         }
         return sentences;
     }
-
+    
     @Override
     public SimilarDocuments compareDocuments(String originalDocument, String suspiciousDocument, double percentage) {
         SimilarDocuments similarity = new SimilarDocuments();
@@ -304,7 +305,7 @@ public class MainSession implements MainSessionLocal {
                             }
                         }
                     }
-
+                    
                 }
                 similarity.setSimilarSentences(sens);
                 similarity.setDocument("");
@@ -314,7 +315,7 @@ public class MainSession implements MainSessionLocal {
         }
         return similarity;
     }
-
+    
     private double getSimilarity(Map<String, Integer> tokensCountText1, String text2) {
         Map<String, Integer> tokensCountText2 = getTokensCount(text2);
         if (tokensCountText2.isEmpty()) {
@@ -323,11 +324,11 @@ public class MainSession implements MainSessionLocal {
         Set<String> vocabulary = new HashSet<>();
         vocabulary.addAll(tokensCountText1.keySet());
         vocabulary.addAll(tokensCountText2.keySet());
-
+        
         double commonsWordsNumber = 0;
         double termsText1Number = 0;
         double termsText2Number = 0;
-
+        
         for (String word : vocabulary) {
             int wordCount1 = tokensCountText1.get(word) != null ? tokensCountText1.get(word) : 0;
             int wordCount2 = tokensCountText2.get(word) != null ? tokensCountText2.get(word) : 0;
@@ -339,12 +340,12 @@ public class MainSession implements MainSessionLocal {
         double percent = Round((ratio * 100), 2);
         return percent;
     }
-
+    
     private double Round(double number, int decimalPlaces) {
         double modifier = Math.pow(10.0, decimalPlaces);
         return Math.round(number * modifier) / modifier;
     }
-
+    
     private Map<String, Integer> getTokensCount(String text) {
         Map<String, Integer> tokensCount = new HashMap<>();
         List<String> tokens = tokenizeString(text);
@@ -357,7 +358,7 @@ public class MainSession implements MainSessionLocal {
         });
         return tokensCount;
     }
-
+    
     private List<String> tokenizeString(String string) {
         List<String> result = new ArrayList<>();
         try (Analyzer analizer = new StandardAnalyzer()) {
@@ -370,17 +371,17 @@ public class MainSession implements MainSessionLocal {
         }
         return result;
     }
-
+    
     @Override
     public SimilarityResult checkLocalRepository(String suspicious, double percentageSimilarity) {
         SimilarityResult result = new SimilarityResult();
         result.setMaxSimilarity(0);
         result.setSimilarTexts(null);
         result.setSimilarityPercantage(0);
-
+        
         return result;
     }
-
+    
     @Override
     public List<RuleMatch> checkGrammer(String document, String omittedwords, String omittedphrases, org.languagetool.Language lan) {
         //words are 'Space delimited'
@@ -401,14 +402,14 @@ public class MainSession implements MainSessionLocal {
                     ((SpellingCheckRule) rule).acceptPhrases(Arrays.asList(phrases));
                 });
             }
-
+            
             matches = langTool.check(document);
-
+            
         } catch (IOException ja) {
         }
         return matches;
     }
-
+    
     @Override
     public boolean authenticateAPICall(String apikey, String ipaddress, String service) {
         boolean validate = false;
@@ -422,6 +423,8 @@ public class MainSession implements MainSessionLocal {
                             auth.setNoofapicalls(auth.getNoofapicalls() + 1);
                             this.updateRecord(auth);
                         }
+                        Apicalls calls = new Apicalls(apikey + util.getPincodes(6), apikey, service, util.getTodaysdate(), util.getCurrentTime(), ipaddress);
+                        this.newEntry(calls);
                     } catch (Exception j) {
                     }
                     validate = true;
@@ -431,7 +434,7 @@ public class MainSession implements MainSessionLocal {
         }
         return validate;
     }
-
+    
     @Override
     public List<Apiauthentication> getApiauthenticationByAllowedIP(String ip) {
         List<Apiauthentication> list = new ArrayList();
@@ -439,24 +442,24 @@ public class MainSession implements MainSessionLocal {
         try {
             list = (List<Apiauthentication>) em.createQuery("SELECT i FROM Apiauthentication i WHERE i.allowedips LIKE :ip ORDER BY i.dateadded ASC")
                     .setParameter("ip", ip).getResultList();
-
+            
         } catch (Exception j) {
         }
         return list;
     }
-
+    
     @Override
     public List<Apiauthentication> getApiauthenticationByContactemail(String email) {
         List<Apiauthentication> list = new ArrayList();
         try {
             list = (List<Apiauthentication>) em.createQuery("SELECT i FROM Apiauthentication i WHERE i.contactemail = :email ORDER BY i.dateadded ASC")
                     .setParameter("email", email).getResultList();
-
+            
         } catch (Exception j) {
         }
         return list;
     }
-
+    
     @Override
     public List<Apiauthentication> getApiauthenticationByDateaddedrange(String datefrom, String dateto) {
         List<Apiauthentication> list = new ArrayList();
@@ -467,7 +470,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Apiauthentication> getApiauthenticationByExpiryStatus(String status) {
         List<Apiauthentication> list = new ArrayList();
@@ -482,43 +485,43 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Apicalls> getApicallsByApikey(String apikey) {
         List<Apicalls> list = new ArrayList();
         try {
             list = (List<Apicalls>) em.createQuery("SELECT i FROM Apicalls i WHERE i.apikey = :apikey ORDER BY i.datecalled DESC, i.timecalled DESC")
                     .setParameter("apikey", apikey).getResultList();
-
+            
         } catch (Exception j) {
         }
         return list;
     }
-
+    
     @Override
     public List<Apicalls> getApicallsByServicecalled(String service) {
         List<Apicalls> list = new ArrayList();
         try {
             list = (List<Apicalls>) em.createQuery("SELECT i FROM Apicalls i WHERE i.servicecalled = :service ORDER BY i.datecalled DESC, i.timecalled DESC")
                     .setParameter("service", service).getResultList();
-
+            
         } catch (Exception j) {
         }
         return list;
     }
-
+    
     @Override
     public List<Apicalls> getApicallsByIPaddress(String ip) {
         List<Apicalls> list = new ArrayList();
         try {
             list = (List<Apicalls>) em.createQuery("SELECT i FROM Apicalls i WHERE i.ipaddresscall = :ip ORDER BY i.datecalled DESC, i.timecalled DESC")
                     .setParameter("ip", ip).getResultList();
-
+            
         } catch (Exception j) {
         }
         return list;
     }
-
+    
     @Override
     public List<Apicalls> getApicallsByDatecalledrange(String datefrom, String dateto) {
         List<Apicalls> list = new ArrayList();
@@ -529,7 +532,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Apicalls> getApicallsByApikeyAndDatecalledrange(String apikey, String datefrom, String dateto) {
         List<Apicalls> list = new ArrayList();
@@ -540,7 +543,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<String> getApicallsAllIpaddresses() {
         List<String> list = new ArrayList();
@@ -551,18 +554,18 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Institutiontype> getAllInstitutiontypes() {
         List<Institutiontype> list = new ArrayList();
         try {
             list = (List<Institutiontype>) em.createQuery("SELECT i FROM Institutiontype i ORDER BY i.typename ASC").getResultList();
-
+            
         } catch (Exception j) {
         }
         return list;
     }
-
+    
     @Override
     public List<Institutions> getInstitutionsByType(String type) {
         List<Institutions> list = new ArrayList();
@@ -577,7 +580,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Institutions> getInstitutionsByDateregisteredrange(String datefrom, String dateto) {
         List<Institutions> list = new ArrayList();
@@ -588,7 +591,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Activationcodebatches> getActivationcodebatchesByInstitution(String institutionid) {
         List<Activationcodebatches> list = new ArrayList();
@@ -599,12 +602,12 @@ public class MainSession implements MainSessionLocal {
                 list = (List<Activationcodebatches>) em.createQuery("SELECT a FROM Activationcodebatches a WHERE a.institutionid = :institutionid ORDER BY a.dategenerated DESC")
                         .setParameter("institutionid", institutionid).getResultList();
             }
-
+            
         } catch (Exception j) {
         }
         return list;
     }
-
+    
     @Override
     public List<Activationcodebatches> getActivationcodebatchesByDaterange(String datefrom, String dateto) {
         List<Activationcodebatches> list = new ArrayList();
@@ -615,7 +618,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Activationcodes> getActivationcodesByDategeneratedrange(String datefrom, String dateto) {
         List<Activationcodes> list = new ArrayList();
@@ -626,7 +629,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Activationcodes> getActivationcodesByBatchAndStatus(String batchid, String activationstatus) {
         List<Activationcodes> list = new ArrayList();
@@ -651,9 +654,9 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
-    public List<Activationcodes> ActivationcodesByUser(String username, String activationstatus) {
+    public List<Activationcodes> getActivationcodesByUser(String username, String activationstatus) {
         List<Activationcodes> list = new ArrayList();
         try {
             if (activationstatus.equalsIgnoreCase("ALL")) {
@@ -667,7 +670,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Membership> getMembershipByInstitution(String institutionid, String membershipttatus) {
         List<Membership> list = new ArrayList();
@@ -687,13 +690,13 @@ public class MainSession implements MainSessionLocal {
                     list = (List<Membership>) em.createQuery("SELECT m FROM Membership m WHERE m.institutionid = :institutionid AND m.membershipstatus = :status ORDER BY m.surname ASC, m.othernames ASC")
                             .setParameter("status", membershipttatus).setParameter("institutionid", institutionid).getResultList();
                 }
-
+                
             }
         } catch (Exception j) {
         }
         return list;
     }
-
+    
     @Override
     public List<Membership> getMembershipByInstitutionid(String instid) {
         List<Membership> list = new ArrayList();
@@ -708,7 +711,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Membership> getMembershipByMembershipright(String right) {
         right = "%" + right + "%";
@@ -720,7 +723,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Membership> getMembershipByStatus(String status) {
         List<Membership> list = new ArrayList();
@@ -735,7 +738,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Membership> getMembershipByStatusAndInstitutionid(String status, String institutionid) {
         List<Membership> list = new ArrayList();
@@ -746,7 +749,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Membership> getMembershipByRightAndInstitutionid(String right, String institutionid) {
         right = "%" + right + "%";
@@ -758,7 +761,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Membership> getMembershipByDateregisteredrange(String datefrom, String dateto) {
         List<Membership> list = new ArrayList();
@@ -769,7 +772,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Document> getDocumentByUsername(String username) {
         List<Document> list = new ArrayList();
@@ -784,7 +787,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Document> getDocumentByPostdaterange(String datefrom, String dateto) {
         List<Document> list = new ArrayList();
@@ -795,7 +798,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Document> getDocumentByUsernameAndPostdaterange(String username, String datefrom, String dateto) {
         List<Document> list = new ArrayList();
@@ -806,7 +809,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Document> getDocumentByInstitutionid(String instid) {
         List<Document> list = new ArrayList();
@@ -817,7 +820,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Document> getDocumentByInstitutionidAndPostdaterange(String institutionid, String datefrom, String dateto) {
         List<Document> list = new ArrayList();
@@ -828,7 +831,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Document> getDocumentByTitle(String title) {
         List<Document> list = new ArrayList();
@@ -839,7 +842,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Document> getDocumentByAuthor(String author) {
         author = "%" + author + "%";
@@ -851,7 +854,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<String> getDocumentAllTitles() {
         List<String> list = new ArrayList();
@@ -862,7 +865,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<String> getDocumentAllAuthors() {
         List<String> list = new ArrayList();
@@ -873,7 +876,7 @@ public class MainSession implements MainSessionLocal {
         }
         return list;
     }
-
+    
     @Override
     public List<Document> getDocumentByPublisheddaterange(String yearfrom, String yearto) {
         List<Document> list = new ArrayList();
@@ -883,5 +886,69 @@ public class MainSession implements MainSessionLocal {
         } catch (Exception j) {
         }
         return list;
+    }
+    
+    @Override
+    public Activationcodes generateActivationCode(String batchcode, String userid) {
+        Activationcodes act = null;
+        try {
+            Membership mem = (Membership) this.getSingleObject(Membership.class, userid);
+            Activationcodebatches batch = (Activationcodebatches) this.getSingleObject(Activationcodebatches.class, batchcode);
+            if (mem != null && batch != null) {
+                if (mem.getInstitutionid().equalsIgnoreCase(batch.getInstitutionid()) || batch.getInstitutionid().equalsIgnoreCase("000")) {
+                    act = new Activationcodes(batchcode + util.getPincodes(6), batchcode, "", userid, util.getTodaysdate(), batch.getAmount(),
+                            batch.getDurationdays(), "INACTIVE");
+                    this.newEntry(act);
+                }
+            }
+        } catch (Exception j) {
+        }
+        return act;
+    }
+    
+    @Override
+    public Paymentreference generatePaymentReference(String activationcode) {
+        Paymentreference pr = null;
+        try {
+            Activationcodes act = (Activationcodes) this.getSingleObject(Activationcodes.class, activationcode);
+            if (act != null) {
+                if (act.getActivationstatus().equalsIgnoreCase("INACTIVE") && !act.getUsername().isEmpty()) {
+                    Membership mem = (Membership) this.getSingleObject(Membership.class, act.getUsername());
+                    Activationcodebatches batch = (Activationcodebatches) this.getSingleObject(Activationcodebatches.class, act.getBatchid());
+                    if (mem != null && batch != null) {
+                        String year = util.getTodaysdate().split("-")[0];
+                        pr = new Paymentreference(year + activationcode, "0", "", batch.getBatchname(), "", act.getAmount(),
+                                batch.getBatchname(), act.getUsername(), activationcode, util.getTodaysdate(), "Not Paid", 0d, "0",
+                                mem.getSurname(), mem.getOthernames(), act.getUsername(), mem.getPhoneno());
+                        this.newEntry(pr);
+                    }
+                }
+            }
+        } catch (Exception j) {
+            
+        }
+        return pr;
+    }
+    
+    @Override
+    public boolean assignUserToActivationCode(String userid, String activationcode) {
+        boolean assigned = false;
+        try {
+            Activationcodes act = (Activationcodes) this.getSingleObject(Activationcodes.class, activationcode);
+            if (act != null) {
+                if (act.getActivationstatus().equalsIgnoreCase("INACTIVE") && act.getUsername().isEmpty()) {
+                    Membership mem = (Membership) this.getSingleObject(Membership.class, userid);
+                    Activationcodebatches batch = (Activationcodebatches) this.getSingleObject(Activationcodebatches.class, act.getBatchid());
+                    if (mem != null && batch != null) {
+                        if (batch.getInstitutionid().equalsIgnoreCase(mem.getInstitutionid())) {
+                            act.setUsername(userid);
+                            this.updateRecord(act);
+                        }
+                    }
+                }
+            }
+        } catch (Exception j) {
+        }
+        return assigned;
     }
 }

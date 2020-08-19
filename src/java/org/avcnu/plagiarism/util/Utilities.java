@@ -5,6 +5,8 @@
  */
 package org.avcnu.plagiarism.util;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -136,4 +138,99 @@ public class Utilities {
         String TODAY = year + "-" + month1 + "-" + day1;
         return TODAY;
     }
+    
+    public String getMD5(String str) {
+        String co = str;
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("MD5");
+            byte[] pb = str.getBytes();
+            md.reset();
+            byte[] db = md.digest(pb);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < db.length; i++) {
+                sb.append(Integer.toHexString(0xff & db[i]));
+            }
+            co = sb.toString();
+        } catch (NoSuchAlgorithmException j) {
+        }
+        return co;
+    }
+    public List<String> getAllServices(){
+        List<String> services = new ArrayList();
+        services.add("Admingeneral");
+        return services;
+    }
+    
+    public List<String> getAllRigths(){
+        List<String> rights = new ArrayList();
+        rights.add("");
+        return rights;
+    }
+    public List<String> getoperations(){
+        List<String> list = new ArrayList();
+        try{
+            list.add("NEWACTIVATIONCODEBATCH");
+            list.add("NEWAPIKEY");
+            list.add("NEWINSTITUTION");
+            list.add("NEWINSTITUTIONTYPE");
+            list.add("NEWMEMBER");
+            list.add("ENCRYPTTEXT");
+            list.add("UPDATEDOCUMENT");
+            list.add("UPDATEINSTITUTION");
+            list.add("UPDATEINSTITUTIONTYPE");
+            list.add("UPDATEMEMBERSHIP");
+            list.add("GETACTIVATIONCODEBATCH");
+            list.add("GETACTIVATIONCODE");
+            list.add("GETAPIKEY");
+            list.add("GETAPICALL");
+            list.add("GETDOCUMENT");
+            list.add("GETINSTITUTION");
+            list.add("GETINSTITUTIONTYPE");
+            list.add("GETMEMBERSHIP");
+            list.add("GETPAYMENTNOTIFICATION");
+            list.add("GETPAYMENTREFERENCE");
+            list.add("GETPAYMENT");
+            list.add("GETPAYMENTTRASH");
+            list.add("GETWEBPAYMENT");
+            list.add("GETAPIKEYSBYIP");
+            list.add("GETAPIKEYSBYEMAIL");
+            list.add("GETAPIKEYSBYSTATUS");
+            list.add("GETAPIKEYSBYDATERANGE");
+            list.add("GETAPICALLSBYAPIKEY");
+            list.add("GETAPICALLSBYSERVICE");
+            list.add("GETAPICALLSBYIP");
+            list.add("GETAPICALLSBYDATERANGE");
+            list.add("GETAPICALLSBYAPIKEYANDDATERANGE");
+            list.add("GETALLIPSINAPICALLS");
+            list.add("GETALLINSTITUTIONTYPES");
+            list.add("GETINSTITUTIONSBYTYPE");
+            list.add("GETINSTITUTIONSBYDATEREGISTERED");
+            list.add("GETACTIVATIONCODEBATCHESBYINSTITUTION");
+            list.add("BETACTIVATIONCODEBATCHESBYDATERANGE");
+            list.add("GETACTIVATIONCODESBYDATERANGE");
+            list.add("GETACTIVATIONCODESBYBATCHIDANDSTATUS");
+            list.add("GETACTIVATIONCODESBYUSERANDSTATUS");
+            list.add("GETMEMBERSBYINSTITUTIONANDSTATUS");
+            list.add("GETMEMBERSHIPBYRIGHT");
+            list.add("GETMEMBERSHIPBYRIGHTANDINSTITUTION");
+            list.add("GETMEMBERSREGISTEREDBYDATE");
+            list.add("GETDOCUMENTSBYUSERID");
+            list.add("GETDOCUMENTBYPOSTDATERANGE");
+            list.add("GETDOCUMENTBYUSERIDANDPOSTDATERANGE");
+            list.add("GETDOCUMENTBYINSTITUTION");
+            list.add("GETDOCUMENTBYINSTITUTIONANDPOSTDATERANGE");
+            list.add("GETDOCUMENTSBYTITLE");
+            list.add("GETDOCUMENTSBYAUTHOR");
+            list.add("GETDOCUMENTTITLES");
+            list.add("GETDOCUMENTAUTHORS");
+            list.add("GENERATEACTIVATIONCODESFORBATCHANDUSERID");
+            list.add("ASSIGNACTIVATIONCODETOUSER");
+            list.add("GENERATEPAYMENTREFERENCE");
+            
+        }catch(Exception n){}
+        return list;
+    }
+    
+    
 }
